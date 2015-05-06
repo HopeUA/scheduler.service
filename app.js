@@ -5,10 +5,11 @@ var logger     = require('morgan');
 var router     = require('./router');
 var debug      = require('debug')('app');
 var RestError  = require('./lib/restError');
+var config     = require('config');
 
 /* Database */
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://mongo.local/scheduler', () => {
+mongoose.connect(config.get('mongodb.url'), () => {
     debug('DB connected');
 });
 
