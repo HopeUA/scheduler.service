@@ -1,0 +1,6 @@
+{
+  "mediaApi": {
+    "endpoint": "http://endpoint.url",
+    "token": "Token"
+  }
+}
