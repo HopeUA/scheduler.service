@@ -118,8 +118,8 @@ var syncEvent = (event) => {
                         title: result.title
                     },
                     show: {
-                        code: result.code.substring(0, 4),
-                        title: result.program
+                        code: result.show.code,
+                        title: result.show.title
                     },
                     state: 'linked'
                 }
