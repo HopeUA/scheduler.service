@@ -35,7 +35,6 @@ var eventSchema = new Schema({
         code: { type: String, default: '' },
         title: { type: String, default: '' }
     },
-    position: { type: Number, default: 0 },
     state: { type: String, default: 'sync' }
 });
 
@@ -53,7 +52,6 @@ var eventTransform = (doc, event) => {
             code: event.episode.code,
             title: event.episode.title
         },
-        position: event.position,
         state: event.state
     }
 };
@@ -262,7 +260,7 @@ var Model = {
                 let query = Event
                     .find()
                     .where('date').gte(params.date).lte(params.dateEnd)
-                    .sort('position')
+                    .sort('date')
                     .limit(100);
 
                 query.exec((error, events) => {
