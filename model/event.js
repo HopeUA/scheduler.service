@@ -46,11 +46,19 @@ var eventTransform = (doc, event) => {
         date: date.toISOString(),
         show: {
             code: event.show.code,
-            title: event.show.title
+            title: event.show.title,
+            description: {
+                short: ''
+            },
+            image: {
+                cover: ''
+            }
         },
         episode: {
             code: event.episode.code,
-            title: event.episode.title
+            title: event.episode.title,
+            description: '',
+            image: ''
         },
         state: event.state
     }
