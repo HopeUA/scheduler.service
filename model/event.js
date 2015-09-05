@@ -33,7 +33,8 @@ var eventSchema = new Schema({
     },
     episode: {
         code: { type: String, default: '' },
-        title: { type: String, default: '' }
+        title: { type: String, default: '' },
+        language: { type: String, default: '' }
     },
     state: { type: String, default: 'sync' }
 });
@@ -58,7 +59,8 @@ var eventTransform = (doc, event) => {
             code: event.episode.code,
             title: event.episode.title,
             description: '',
-            image: ''
+            image: '',
+            language: event.episode.language
         },
         state: event.state
     }
@@ -118,10 +120,16 @@ var syncEvent = (event) => {
                     state: 'free'
                 }
             } else {
+                let lang = result.lang;
+                if (lang == 'ua') {
+                    lang = 'uk';
+                }
+
                 data = {
                     episode: {
                         code: result.code,
-                        title: result.title
+                        title: result.title,
+                        language: lang
                     },
                     show: {
                         code: result.show.code,
