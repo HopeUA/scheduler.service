@@ -311,6 +311,7 @@ var Model = {
                     .sort('date')
                     .limit(100);
 
+                debug('DB Query');
                 try {
                     var events = yield query.exec();
                 } catch (e) {
@@ -321,11 +322,13 @@ var Model = {
                         parent: e
                     });
                 }
+                debug('DB Query done');
 
                 let result = [];
 
                 for (let event of events) {
                     try {
+                        debug('Inject item');
                         let item = yield injectMedia(event);
                         result.push(item);
                     } catch (e) {
