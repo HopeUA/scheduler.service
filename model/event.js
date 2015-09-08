@@ -29,14 +29,24 @@ var eventSchema = new Schema({
 
     show: {
         code: { type: String, default: '' },
-        title: { type: String, default: '' }
+        title: { type: String, default: '' },
+        description: {
+            short: { type: String, default: '' }
+        },
+        images: {
+            cover: { type: String, default: '' },
+            background: { type: String, default: '' }
+        },
+        category: { type: String, default: '' }
     },
     episode: {
         code: { type: String, default: '' },
         title: { type: String, default: '' },
+        description: { type: String, default: '' },
+        image: { type: String, default: '' },
         language: { type: String, default: '' }
-    },
-    state: { type: String, default: 'sync' }
+    }
+    //state: { type: String, default: 'sync' }
 });
 
 var eventTransform = (doc, event) => {
@@ -45,24 +55,8 @@ var eventTransform = (doc, event) => {
     return {
         id: event._id,
         date: date.toISOString(),
-        show: {
-            code: event.show.code,
-            title: event.show.title,
-            description: {
-                short: ''
-            },
-            image: {
-                cover: ''
-            }
-        },
-        episode: {
-            code: event.episode.code,
-            title: event.episode.title,
-            description: '',
-            image: '',
-            language: event.episode.language
-        },
-        state: event.state
+        show: event.show,
+        episode: event.episode
     }
 };
 
@@ -151,6 +145,44 @@ var syncEvent = (event) => {
             debug(error);
         }
     );
+};
+
+var injectMedia = (event) => {
+    return co(function*(){
+        if (!event.episode.code) {
+            return event;
+        }
+
+        var episode = yield MediaAPI.get(event.episode.code);
+
+        let lang = episode.lang;
+        if (lang == 'ua') {
+            lang = 'uk';
+        }
+
+        event.episode = {
+            code: episode.code,
+            title: episode.title,
+            description: episode.desc,
+            language: lang
+        };
+
+        if (episode.media) {
+            event.episode.image = episode.media.image.src;
+        }
+
+        var show = yield MediaAPI.getShow(event.show.code);
+
+        event.show = {
+            code: show.code,
+            title: show.title,
+            description: show.description,
+            images: show.images,
+            category: show.category
+        };
+
+        return event;
+    });
 };
 
 /**
@@ -272,25 +304,36 @@ var Model = {
 
             params = validateParams(params);
 
-            return new Promise((resolve, reject) => {
+            return co(function* (){
                 let query = Event
                     .find()
                     .where('date').gte(params.date).lte(params.dateEnd)
                     .sort('date')
                     .limit(100);
 
-                query.exec((error, events) => {
-                    if (error) {
-                        return reject(new RestError({
-                            message: 'Collection error',
-                            status: 400,
-                            code: 105,
-                            parent: error
-                        }));
-                    }
+                try {
+                    var events = yield query.exec();
+                } catch (e) {
+                    throw new RestError({
+                        message: 'Collection error',
+                        status: 400,
+                        code: 105,
+                        parent: e
+                    });
+                }
 
-                    resolve(events);
-                });
+                let result = [];
+
+                for (let event of events) {
+                    try {
+                        let item = yield injectMedia(event);
+                        result.push(item);
+                    } catch (e) {
+                        result.push(event);
+                    }
+                }
+
+                return result;
             });
         },
 
@@ -302,7 +345,7 @@ var Model = {
                     if (error) {
                         return reject(error);
                     }
-                    syncEvent(result);
+                    //syncEvent(result);
                     resolve(result);
                 })
             });
