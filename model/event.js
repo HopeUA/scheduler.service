@@ -155,31 +155,35 @@ var injectMedia = (event) => {
 
         var episode = yield MediaAPI.get(event.episode.code);
 
-        let lang = episode.lang;
-        if (lang == 'ua') {
-            lang = 'uk';
-        }
+        if (episode) {
+            let lang = episode.lang;
+            if (lang == 'ua') {
+                lang = 'uk';
+            }
 
-        event.episode = {
-            code: episode.code,
-            title: episode.title,
-            description: episode.desc,
-            language: lang
-        };
+            event.episode = {
+                code: episode.code,
+                title: episode.title,
+                description: episode.desc,
+                language: lang
+            };
 
-        if (episode.media) {
-            event.episode.image = episode.media.image.src;
+            if (episode.media) {
+                event.episode.image = episode.media.image.src;
+            }
         }
 
         var show = yield MediaAPI.getShow(event.show.code);
 
-        event.show = {
-            code: show.code,
-            title: show.title,
-            description: show.description,
-            images: show.images,
-            category: show.category
-        };
+        if (show) {
+            event.show = {
+                code: show.code,
+                title: show.title,
+                description: show.description,
+                images: show.images,
+                category: show.category
+            };
+        }
 
         return event;
     });
