@@ -97,6 +97,8 @@ var validateParams = (params) => {
     let dateEnd = (params.dateEnd && moment(params.dateEnd).isValid()) ? moment(params.dateEnd) : date.clone().endOf('day');
     data.dateEnd = dateEnd;
 
+    data.inject = (params.hasOwnProperty('inject') && !params.inject) ? false : true;
+
     return data;
 };
 
