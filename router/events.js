@@ -4,6 +4,7 @@ var debug  = require('debug')('app');
 var router = require('express').Router();
 var Event  = require('../model/event');
 var RestError = require('../lib/restError');
+var co     = require('co');
 
 /* Event Collection */
 router.route('/')
@@ -59,6 +60,34 @@ router.route('/')
                 next(error);
             }
         );
+    });
+
+router.route('/count')
+    .post((request, response, next) => {
+        let dates = request.body.dates;
+        if (!dates) {
+            return next(new RestError({
+                message: 'Dates parameter is required',
+                status: 403,
+                code: 403
+            }));
+        }
+
+        co(function*(){
+            let counts = yield dates.map((date) => {
+                return Event.count(date);
+            });
+
+            let result = {};
+            for (let count of counts) {
+                result[count.date] = count.total;
+            }
+
+            response.status(200);
+            response.json({dates: result});
+        }).catch((error) => {
+            next(error);
+        });
     });
 
 /* Event */

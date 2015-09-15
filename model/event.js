@@ -305,6 +305,25 @@ var Model = {
         });
     },
 
+    count: (date) => {
+        let $date = moment(date);
+
+        return new Promise((resolve, reject) => {
+            let query = Event
+                .find()
+                .where('date').gte(moment(date).startOf('day')).lte(moment(date).endOf('day'))
+                .count();
+
+            query.exec((error, total) => {
+                if (error) {
+                    return reject(error);
+                }
+
+                resolve({date, total});
+            });
+        });
+    },
+
     collection: {
         get: (params) => {
 
