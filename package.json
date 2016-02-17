@@ -4,16 +4,19 @@
   "description": "Hope Scheduler Service",
   "main": "run.js",
   "scripts": {
-    "start": "node run.js",
+    "start": "node -r babel-register -r babel-polyfill app.js",
+    "dev": "DEBUG=app NODE_ENV=dev node -r babel-register -r babel-polyfill app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Sergey Sadovoi <sergey@hope.ua>",
   "license": "MIT",
   "dependencies": {
-    "agenda": "^0.6.28",
-    "babel": "^5.8.23",
+    "babel-polyfill": "^6.5.0",
+    "babel-preset-es2015": "^6.5.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-register": "^6.5.1",
     "body-parser": "^1.13.3",
-    "cacheman-mongo": "^0.2.1",
+    "cacheman-mongo": "^1.0.3",
     "co": "^4.6.0",
     "config": "^1.16.0",
     "debug": "^2.2.0",
@@ -24,7 +27,6 @@
     "request": "^2.61.0"
   },
   "devDependencies": {
-    "chai": "^3.2.0",
-    "mocha-traceur": "^2.1.0"
+    "chai": "^3.2.0"
   }
 }

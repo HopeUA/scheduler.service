@@ -28,6 +28,7 @@ var eventSchema = new Schema({
     date: { type: Date, required: true },
 
     show: {
+        uid: { type: String, default: '' },
         code: { type: String, default: '' },
         title: { type: String, default: '' },
         description: {
@@ -40,6 +41,7 @@ var eventSchema = new Schema({
         category: { type: String, default: '' }
     },
     episode: {
+        uid: { type: String, default: '' },
         code: { type: String, default: '' },
         title: { type: String, default: '' },
         description: { type: String, default: '' },
@@ -102,93 +104,30 @@ var validateParams = (params) => {
     return data;
 };
 
-/* Sync */
-var syncEvent = (event) => {
+var injectMedia = async (event) => {
     if (!event.episode.code) {
-        return;
+        return event;
     }
 
-    MediaAPI.get(event.episode.code).then(
-        (result) => {
-            let data = {};
-            if (result.error) {
-                data = {
-                    state: 'free'
-                }
-            } else {
-                let lang = result.lang;
-                if (lang == 'ua') {
-                    lang = 'uk';
-                }
+    const episode = await MediaAPI.get(event.episode.code);
+    let   show = null;
 
-                data = {
-                    episode: {
-                        code: result.code,
-                        title: result.title,
-                        language: lang
-                    },
-                    show: {
-                        code: result.show.code,
-                        title: result.show.title
-                    },
-                    state: 'linked'
-                }
-            }
-            Model.update(event.id, data).then(
-                (result) => {
+    if (episode) {
+        show = episode.show;
+        episode.code = episode.uid;
+        event.episode = episode;
+    }
 
-                },
-                (error) => {
-                    debug(error);
-                }
-            );
-        },
-        (error) => {
-            debug(error);
-        }
-    );
-};
+    if (!show) {
+        show = await MediaAPI.getShow(event.show.code);
+    }
 
-var injectMedia = (event) => {
-    return co(function*(){
-        if (!event.episode.code) {
-            return event;
-        }
+    if (show) {
+        show.code = show.uid;
+        event.show = show;
+    }
 
-        var episode = yield MediaAPI.get(event.episode.code);
-
-        if (episode) {
-            let lang = episode.lang;
-            if (lang == 'ua') {
-                lang = 'uk';
-            }
-
-            event.episode = {
-                code: episode.code,
-                title: episode.title,
-                description: episode.desc,
-                language: lang
-            };
-
-            if (episode.media) {
-                event.episode.image = episode.media.image.src;
-            }
-        }
-
-        var show = yield MediaAPI.getShow(event.show.code);
-
-        if (show) {
-            event.show = {
-                code: show.code,
-                title: show.title,
-                description: show.description,
-                images: show.images,
-                category: show.category
-            };
-        }
-
-        return event;
-    });
+    return event;
 };
 
 /**
@@ -325,45 +264,44 @@ var Model = {
     },
 
     collection: {
-        get: (params) => {
+        get: async (params) => {
 
             params = validateParams(params);
 
-            return co(function* (){
-                let query = Event
-                    .find()
-                    .where('date').gte(params.date).lte(params.dateEnd)
-                    .sort('date')
-                    .limit(100);
+            let query = Event
+                .find()
+                .where('date').gte(params.date).lte(params.dateEnd)
+                .sort('date')
+                .limit(10);
 
-                try {
-                    var events = yield query.exec();
-                } catch (e) {
-                    throw new RestError({
-                        message: 'Collection error',
-                        status: 400,
-                        code: 105,
-                        parent: e
-                    });
-                }
+            try {
+                var events = await query.exec();
+            } catch (e) {
+                console.log(2);
+                throw new RestError({
+                    message: 'Collection error',
+                    status: 400,
+                    code: 105,
+                    parent: e
+                });
+            }
 
-                let result = [];
+            let result = [];
 
-                if (params.inject) {
-                    for (let event of events) {
-                        try {
-                            let item = yield injectMedia(event);
-                            result.push(item);
-                        } catch (e) {
-                            result.push(event);
-                        }
+            if (params.inject) {
+                for (let event of events) {
+                    try {
+                        let item = await injectMedia(event);
+                        result.push(item);
+                    } catch (e) {
+                        result.push(event);
                     }
-                } else {
-                    result = events;
                 }
+            } else {
+                result = events;
+            }
 
-                return result;
-            });
+            return result;
         },
 
         add: (data) => {

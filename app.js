@@ -9,7 +9,10 @@ var config     = require('config');
 
 /* Database */
 var mongoose = require('mongoose');
-mongoose.connect(config.get('mongodb.url'), () => {
+mongoose.connect(config.get('mongodb.url'), (error) => {
+    if (error) {
+        return debug(error.message);
+    }
     debug('DB connected');
 });
 
