@@ -105,11 +105,14 @@ var validateParams = (params) => {
 };
 
 var injectMedia = async (event) => {
+    console.log('inject start');
+    console.log(event);
     if (!event.episode.code) {
         return event;
     }
 
     const episode = await MediaAPI.get(event.episode.code);
+    console.log(episode);
     let   show = null;
 
     if (episode) {
@@ -126,7 +129,8 @@ var injectMedia = async (event) => {
         show.code = show.uid;
         event.show = show;
     }
-
+    console.log(event);
+    console.log('inject finish');
     return event;
 };
 
@@ -277,7 +281,6 @@ var Model = {
             try {
                 var events = await query.exec();
             } catch (e) {
-                console.log(2);
                 throw new RestError({
                     message: 'Collection error',
                     status: 400,

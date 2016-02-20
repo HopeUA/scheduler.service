@@ -1,6 +1,6 @@
 {
   "name": "scheduler.service",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Hope Scheduler Service",
   "main": "run.js",
   "scripts": {
