@@ -275,8 +275,7 @@ var Model = {
             let query = Event
                 .find()
                 .where('date').gte(params.date).lte(params.dateEnd)
-                .sort('date')
-                .limit(10);
+                .sort('date');
 
             try {
                 var events = await query.exec();
