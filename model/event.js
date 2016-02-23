@@ -46,7 +46,8 @@ var eventSchema = new Schema({
         title: { type: String, default: '' },
         description: { type: String, default: '' },
         image: { type: String, default: '' },
-        language: { type: String, default: '' }
+        language: { type: String, default: '' },
+        trailers: { type: Object }
     }
     //state: { type: String, default: 'sync' }
 });
@@ -105,15 +106,12 @@ var validateParams = (params) => {
 };
 
 var injectMedia = async (event) => {
-    console.log('inject start');
-    console.log(event);
     if (!event.episode.code) {
         return event;
     }
 
     const episode = await MediaAPI.get(event.episode.code);
-    console.log(episode);
-    let   show = null;
+    let show = null;
 
     if (episode) {
         show = episode.show;
@@ -129,8 +127,6 @@ var injectMedia = async (event) => {
         show.code = show.uid;
         event.show = show;
     }
-    console.log(event);
-    console.log('inject finish');
     return event;
 };
 
