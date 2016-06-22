@@ -19,7 +19,7 @@ mongoose.connect(config.get('mongodb.url'), (error) => {
 /* CORS */
 app.all('*', (request, response, next) => {
     response.header('Access-Control-Allow-Origin', '*');
-    response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     response.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, PATCH');
     next();
 });
@@ -29,6 +29,23 @@ app.disable('x-powered-by');
 app.use(bodyParser.json());
 /* Logger */
 app.use(logger());
+/* Token */
+app.use((request, response, next) => {
+    const token = request.headers.authorization ?
+        new Buffer(
+            request.headers.authorization.replace('Bearer ', ''),
+            'base64'
+        ).toString('utf8')
+        : null;
+
+    let actions = [];
+    if (token !== null && config.get('auth.token') === token) {
+        actions.push('scheduler.events.write');
+    }
+
+    request.user = { actions };
+    next();
+});
 /* Routes */
 app.use('/v1', router);
 
@@ -48,18 +65,22 @@ app.use((error, request, response, next) => {
         error = RestError.createFromError(error);
     }
 
+    const errorOutput = {
+        code: 'SCHEDULER-' + error.code,
+        message: error.message
+    };
+    if (app.settings.env === 'dev') {
+        errorOutput.stack  = error.stack;
+        errorOutput.parent = {
+            message: error.parent.message,
+            stack: error.parent.stack
+        };
+    }
+
     response
         .status(error.status)
         .json({
-            error: {
-                code:    'SCHEDULER-' + error.code,
-                message: error.message,
-                stack:   error.stack,
-                parent: {
-                    message: error.parent.message,
-                    stack: error.parent.stack
-                }
-            }
+            error: errorOutput
         });
 });
 

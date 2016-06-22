@@ -28,6 +28,16 @@ router.route('/')
 
     /* POST */
     .post((request, response, next) => {
+        const user = request.user;
+        if (user.actions.indexOf('scheduler.events.write') === -1) {
+            return next(
+                new RestError({
+                    code: 403,
+                    message: 'Unauthorized access'
+                })
+            );
+        }
+
         Event.collection.add(request.body).then(
             (event) => {
                 response.status(201);
@@ -42,6 +52,16 @@ router.route('/')
 
     /* DELETE */
     .delete((request, response, next) => {
+        const user = request.user;
+        if (user.actions.indexOf('scheduler.events.write') === -1) {
+            return next(
+                new RestError({
+                    code: 403,
+                    message: 'Unauthorized access'
+                })
+            );
+        }
+
         // Delete only one day
         if (!request.query.date) {
             return next(new RestError({
@@ -110,6 +130,15 @@ router.route('/:id')
 
     /* PUT */
     .put((request, response, next) => {
+        const user = request.user;
+        if (user.actions.indexOf('scheduler.events.write') === -1) {
+            return next(
+                new RestError({
+                    code: 403,
+                    message: 'Unauthorized access'
+                })
+            );
+        }
 
         Event.update(request.params.id, request.body, { overwrite: true }).then(
             (event) => {
@@ -125,6 +154,15 @@ router.route('/:id')
 
     /* PATCH */
     .patch((request, response, next) => {
+        const user = request.user;
+        if (user.actions.indexOf('scheduler.events.write') === -1) {
+            return next(
+                new RestError({
+                    code: 403,
+                    message: 'Unauthorized access'
+                })
+            );
+        }
 
         Event.update(request.params.id, request.body, { overwrite: false }).then(
             (event) => {
@@ -140,6 +178,15 @@ router.route('/:id')
 
     /* DELETE */
     .delete(function(request, response, next){
+        const user = request.user;
+        if (user.actions.indexOf('scheduler.events.write') === -1) {
+            return next(
+                new RestError({
+                    code: 403,
+                    message: 'Unauthorized access'
+                })
+            );
+        }
 
         Event.remove(request.params.id).then(
             () => {
