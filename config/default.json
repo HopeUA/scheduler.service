@@ -3,6 +3,10 @@
     "endpoint": "http://endpoint.url",
     "token": "Token"
   },
+  "compressorApi": {
+    "endpoint": "http://endpoint.url",
+    "token": "Token"
+  },
   "mongodb": {
     "url": "mongodb://db.url/collection",
     "url2": "db.url:27017/collection"
