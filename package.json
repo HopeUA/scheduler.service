@@ -1,6 +1,6 @@
 {
   "name": "scheduler.service",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Hope Scheduler Service",
   "scripts": {
     "start": "node -r babel-register app.js",
