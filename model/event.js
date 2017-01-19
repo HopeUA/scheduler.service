@@ -22,6 +22,7 @@ var Schema   = mongoose.Schema;
 var RestError = require('../lib/restError');
 var co       = require('co');
 var MediaAPI = require('../lib/MediaAPI');
+var CompressorAPI = require('../lib/CompressorAPI');
 
 /* Schema */
 var eventSchema = new Schema({
@@ -310,7 +311,7 @@ var Model = {
                     if (error) {
                         return reject(error);
                     }
-                    //syncEvent(result);
+                    CompressorAPI.add(data.episode.code);
                     resolve(result);
                 })
             });
