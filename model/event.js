@@ -311,7 +311,11 @@ var Model = {
                     if (error) {
                         return reject(error);
                     }
-                    CompressorAPI.add(data.episode.code);
+                    try {
+                        CompressorAPI.add(data.episode.code);
+                    } catch (error) {
+                        console.error(error);
+                    }
                     resolve(result);
                 })
             });
